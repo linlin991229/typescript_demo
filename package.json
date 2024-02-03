@@ -1,0 +1,13 @@
+{
+  "version":"0.0.1",
+  "name":"i18n data convert",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "lint": "pnpm dlx @biomejs/biome lint src/index.ts"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.5.3",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  }
+}

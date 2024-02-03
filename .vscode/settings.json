@@ -1,0 +1,6 @@
+{
+  "code-runner.executorMap": {
+    "typescript": "pnpm dev"
+  },
+  "editor.defaultFormatter": "biomejs.biome"
+}
