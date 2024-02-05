@@ -60,47 +60,53 @@ function conversion<T extends Record<string, object>>(obj: T, target = result) {
 
 conversion(data);
 
+type JsonData = Record<string, unknown>;
 
+function convertData(data: JsonData | JsonData[], target: JsonData | JsonData[]) {
+    // 判断data是否是数组
+    if (Array.isArray(data)) {
+      // 如果target是响应式对象，转为非响应式对象
+      // 是数组对每一个元素进行处理
+      if (result.value === target) {
+        (result.value as JsonData[]) = target = [];
+      } else {
+        target = [];
+      }
+      for (let i = 0; i < data.length; i++) {
+        // 为result增加一个元素长度
+        target = target as unknown as JsonData[];
 
-
-function conversionData<T extends Record<string, unknown> | Array<Record<string, unknown>>>(obj: T, target: T) {
-	// 1. 判断是否是数组
-	if (Array.isArray(obj)) {
-		console.log("是数组");
-		// 遍历数组
-		for (let i = 0; i < obj.length; i++) {
-			// 判断是否是数组
-			if (Array.isArray(obj[i])) {
-				conversionData(obj[i] as T, (target as Array<Record<string, unknown>>)[i] as T);
-			}
-		}
-	}
-
-	// 判断是否是object
-	if (typeof obj === "object") {
-		// 2. 遍历所有key
-		for (const key in obj) {
-			// 2.判断key是否以Zh、En、Ja结尾
-			if (key.endsWith("Zh") || key.endsWith("En") || key.endsWith("Ja")) {
-				// 3.获取key对应的值,并赋值
-				// 截断后面的Zh、En、Ja
-				const newKey = key.substring(0, key.length - 2);
-				// 判断是否有父级key
-				(target as Record<string, unknown>)[newKey] = (obj as Record<string, unknown>)[newKey + currentLanguage];
-				continue;
-			}
-			if (typeof obj[key] === "object") {
-				// 4.递归
-				// 判断值是否为object
-				target[key] = { ...target[key] };
-				conversionData(obj[key] as T, target[key] as T);
-			} else {
-				// 普通数据直接复制
-				target[key] = obj[key];
-			}
-		}
-	}
-}
+        // 增加一个元素，用于存储下一个对象的数据
+        target.push({});
+        // 递归调用
+        convertData(data[i], target[i]);
+      }
+    } else if (typeof data === 'object') {
+      // 是对象
+      for (const key in data) {
+        // 为target增加一个key
+        target = target as unknown as JsonData;
+        // 判断该key是否是i18n数据的key
+        if (key.endsWith('Zh') || key.endsWith('En') || key.endsWith('Ja')) {
+          // 是i18n数据的key
+          // 截取i18n数据的key为新的key
+          const newKey = key.slice(0, -2);
+          // 为result增加一个key
+        //   target[newKey] = data[newKey + suffix.value];
+          // 已经处理完当前key,结束当前循环
+          continue;
+        }
+        if (typeof data[key] === 'object') {
+          // 递归调用
+          target[key] = { ...(target[key] as object) };
+          convertData(data[key] as JsonData | JsonData[], target[key] as JsonData | JsonData[]);
+        } else {
+          // 普通数据直接赋值
+          target[key] = data[key];
+        }
+      }
+    }
+  }
 
 const data2 = [{
 	a: 1,
@@ -126,6 +132,5 @@ const data2 = [{
 	}
 }]
 const result2 = [{}];
-conversionData(data2, result2);
 
 console.log(result2[0]);
